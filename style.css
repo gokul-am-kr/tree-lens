@@ -2135,3 +2135,19 @@
     [data-theme="light"] .fv-tkt-num   { color:#059669; }
     [data-theme="light"] .fv-time      { color:#2563eb; }
     [data-theme="light"] .app-tab.active { background:#2563eb; }
+
+/* ── Install button ──────────────────────────────────── */
+#btn-install {
+  padding: 0 12px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+#btn-install:hover { background: var(--accent); color: #fff; }

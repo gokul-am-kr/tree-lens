@@ -37,6 +37,7 @@
       <button class="fs-btn active" data-size="md" title="Medium text">M</button>
       <button class="fs-btn" data-size="lg" title="Large text">L</button>
     </div>
+    <button id="btn-install" title="Install app" style="display:none">⬇ Install</button>
     <button id="theme-toggle" title="Toggle theme"></button>
   </div>
 </header>
@@ -162,8 +163,32 @@
 
 <script src="app.js" defer></script>
 
-<!-- Service Worker registration -->
+<!-- PWA: service worker + install prompt -->
 <script>
+  // Install prompt
+  let _installPrompt = null;
+  const _installBtn = document.getElementById('btn-install');
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    _installPrompt = e;
+    _installBtn.style.display = '';
+  });
+
+  _installBtn.addEventListener('click', async () => {
+    if (!_installPrompt) return;
+    _installPrompt.prompt();
+    const { outcome } = await _installPrompt.userChoice;
+    if (outcome === 'accepted') _installBtn.style.display = 'none';
+    _installPrompt = null;
+  });
+
+  window.addEventListener('appinstalled', () => {
+    _installBtn.style.display = 'none';
+    _installPrompt = null;
+  });
+
+  // Service worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js')
