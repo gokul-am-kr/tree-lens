@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-size="md">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XML / JSON Parser</title>
+
+  <!-- PWA -->
+  <meta name="theme-color" content="#07080d" />
+  <meta name="description" content="Parse and explore XML & JSON as an interactive node graph or tree view." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TreeLens" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+    </svg>
+  </div>
+  <span class="app-title">XML &amp; JSON Parser</span>
+  <span class="header-pill">Node Explorer</span>
+  <div class="app-tabs">
+    <button class="app-tab active" id="btn-mode-parser">Parser</button>
+    <button class="app-tab" id="btn-mode-flight">✈ Flight View</button>
+  </div>
+  <div class="header-controls">
+    <div class="fs-toggle">
+      <button class="fs-btn" data-size="sm" title="Small text">S</button>
+      <button class="fs-btn active" data-size="md" title="Medium text">M</button>
+      <button class="fs-btn" data-size="lg" title="Large text">L</button>
+    </div>
+    <button id="theme-toggle" title="Toggle theme"></button>
+  </div>
+</header>
+
+<div class="workspace">
+
+  <!-- ── Input pane ─────────────────────── -->
+  <div class="input-pane">
+
+    <!-- Doc A -->
+    <div class="doc-section">
+      <div class="toolbar">
+        <span class="pane-label">Doc A</span>
+        <div class="btn-row">
+          <button class="btn" id="btn-json">JSON</button>
+          <button class="btn" id="btn-xml">XML</button>
+          <button class="btn" id="btn-clear">Clear</button>
+          <button class="btn primary" id="btn-parse">▶ Parse</button>
+        </div>
+      </div>
+      <textarea id="input-area" spellcheck="false"
+        placeholder="Paste JSON or XML here…&#10;&#10;Ctrl + Enter to parse"></textarea>
+      <div class="statusbar">
+        <span id="s-badge" class="s-badge empty">—</span>
+        <span id="s-msg">Waiting for input</span>
+      </div>
+    </div>
+
+    <!-- Doc B (compare) — hidden by default -->
+    <div class="doc-section doc-b-wrap" id="doc-b-wrap">
+      <div class="toolbar">
+        <span class="doc-b-label">Doc B</span>
+        <div class="btn-row">
+          <button class="btn" id="btn-b-json">JSON</button>
+          <button class="btn" id="btn-b-xml">XML</button>
+          <button class="btn" id="btn-b-clear">Clear</button>
+          <button class="btn primary" id="btn-b-parse">▶ Parse B</button>
+        </div>
+      </div>
+      <textarea id="input-area-b" spellcheck="false"
+        placeholder="Paste Doc B (JSON or XML) for comparison…&#10;&#10;Ctrl + Enter to parse"></textarea>
+      <div class="statusbar">
+        <span id="s-badge-b" class="s-badge empty">—</span>
+        <span id="s-msg-b">Waiting for input</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Canvas pane ────────────────────── -->
+  <div class="output-pane">
+    <div class="toolbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="toggle-input-btn" title="Toggle input panel">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <line x1="9" y1="3" x2="9" y2="21"/>
+          </svg>
+          Input
+        </button>
+        <span class="pane-label">Node Explorer</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btn-compare" title="Toggle compare mode">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+            <line x1="9" y1="3" x2="9" y2="21"/><polyline points="4 8 9 3 14 8"/>
+            <line x1="15" y1="21" x2="15" y2="3"/><polyline points="20 16 15 21 10 16"/>
+          </svg>
+          Compare
+        </button>
+        <button class="btn" id="btn-view-toggle" title="Toggle between node graph and classic tree view">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+          Tree
+        </button>
+        <div class="bm-btn-wrap">
+          <button class="btn" id="btn-bookmarks" title="Bookmarks">☆ Bookmarks</button>
+          <span id="bm-badge"></span>
+        </div>
+        <button class="btn" id="btn-expand-all">Expand all</button>
+        <button class="btn" id="btn-collapse-all">Collapse all</button>
+      </div>
+    </div>
+    <!-- Search strip -->
+    <div class="search-strip">
+      <div class="ss-field">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="search-input" placeholder="Search keys, tags or values… (e.g. passenger, ADT, Error)" autocomplete="off" />
+      </div>
+      <div id="search-meta">
+        <span class="ss-count" id="ss-count">0 results</span>
+        <button id="btn-search-clear" title="Clear search">✕</button>
+      </div>
+    </div>
+
+    <div id="canvas-area">
+      <div id="canvas-inner">
+        <svg id="svg-lines"></svg>
+        <div id="empty-state">
+          <div class="empty-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted)">
+              <rect x="3" y="3" width="18" height="18" rx="3"/>
+              <path d="M3 9h18M9 21V9"/>
+            </svg>
+          </div>
+          <p>Parse XML or JSON to explore the node graph</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diff / compare view (shown instead of canvas when compare mode active) -->
+    <div id="diff-view"></div>
+  </div>
+
+  <!-- Flight View panel (shown instead of output-pane when flight mode active) -->
+  <div id="flight-view"></div>
+
+</div>
+
+<script src="app.js" defer></script>
+
+<!-- Service Worker registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .catch(err => console.warn('SW registration failed:', err));
+    });
+  }
+</script>
+
+</body>
+</html>
